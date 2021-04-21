@@ -7,8 +7,6 @@ export default function Home(props) {
     
     <>
       <h1>test</h1>
-
-      
     </>
   )
 }
