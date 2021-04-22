@@ -1,12 +1,20 @@
 import { GetStaticProps } from 'next'
-import Header from '../components/Header'
+import { formatDateEpisodes } from '../helpers/FormatHelpers'
 
 
+const baseUrl = "http://localhost:3333/"
 
 type Episode = {
     id: string,
     title: string,
     members: string
+}
+
+//Define the parameters of the request to API
+const params = {
+  "_limit" : 8,
+  "_sort" : "published_at",
+  "_order" : "desc"
 }
 
 //Typing the props received by the component Home if a struct of Object that contains a property of episodes that stores a Array of object 
@@ -32,7 +40,11 @@ export default function Home(props: HomeProps) {
  export const getStaticProps : GetStaticProps = async function(){
 
   //Request the API that return the data episodes. With async KeyWord the controller of calls get out of the function until the execution has ended
-  var responseApi = await fetch("http://localhost:3333/episodes")
+  //The query params in the request url set the format of return json data. Order by published_at property whith a limit of 8 rows or 8 Object of Type Episode, defined by Typing Episode.
+  var responseApi = await fetch(`${baseUrl}episodes?`
+    + `_limit=${params["_limit"]}&`
+    + `_sort=${params["_sort"]}&` 
+    + `_order=${params["_order"]}`)
 
   // Check the status code of the response of API
   if (responseApi.ok) {
@@ -42,11 +54,23 @@ export default function Home(props: HomeProps) {
     var data = await responseApi.json();
 
   }else if(responseApi.status > 400){
+
     //Print the responded error returned by API in the console
     console.error("The API not responded as expected. Try again Later")
     return;
 
   }
+
+  const episodes = data.map(function(ep){
+    return {
+      id: ep.id,
+      title: ep.title,
+      thumbnail: ep.thumbnail,
+      members: ep.members,
+      publishedAt: formatDateEpisodes(ep.published_at)
+      
+    }
+  })
     
   return {
 
