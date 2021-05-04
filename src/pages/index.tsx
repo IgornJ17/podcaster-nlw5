@@ -3,6 +3,8 @@ import styles from './home.module.scss'
 import Image from 'next/image'
 import Link from 'next/link';
 import { allowedStatusCodes } from 'next/dist/lib/load-custom-routes'
+import { useContext } from 'react';
+import PlayerContext from '../context/PlayerContext';
 
 
 const HelperMethods = require('../helpers/FormatHelpers.ts')
@@ -35,6 +37,8 @@ type HomeProps = {
 }
 
 export default function Home({latestEpisodes, restOfEpisodes}: HomeProps) {
+
+  const { startPlay } = useContext(PlayerContext)
   
   return ( 
   
@@ -67,7 +71,7 @@ export default function Home({latestEpisodes, restOfEpisodes}: HomeProps) {
                         <span>{ep.durationAsString}</span>
                     </div>
 
-                    <button>
+                    <button type="button" onClick={() => startPlay(ep)}>
                       <img src="/play-green.svg" alt="Play"/>
                     </button>
 
@@ -118,7 +122,7 @@ export default function Home({latestEpisodes, restOfEpisodes}: HomeProps) {
                     <td style={{ width: 100 }}>{ep.publishedAt}</td>
                     <td>{ep.durationAsString}</td>
                     <td>
-                      <button type="button">
+                      <button type="button" onClick={() => startPlay(ep)}>
                         <img src="/play-green.svg" alt="Play"/>
                       </button>
                     </td>

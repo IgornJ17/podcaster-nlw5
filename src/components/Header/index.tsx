@@ -4,7 +4,7 @@ import enUS from 'date-fns/locale/en-US'
 
 function Header(){
 
-    const currentDate = format(new Date(), 'EEEEEE, d MMM', {
+    const currentDate = format(new Date(), 'EEEEE, d MMM', {
         locale: enUS
     });
 

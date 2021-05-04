@@ -5,7 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link';
 
 const HelperMethods = require('../../helpers/FormatHelpers.ts')
-const baseUrl = "http://localhost:3333/episodes/"
+const baseUrlEpisodes = "http://localhost:3333/episodes/"
+const baseUrl = "http://localhost:3333/"
 
 
 type Episode = {
@@ -63,8 +64,31 @@ export default function Episode( {episode} : EpisodeProps ){
 }   
 
 export const getStaticPaths : GetStaticPaths = async function(){
+    
+    const params = {
+        "_limit" : 2,
+        "_sort" : "published_at",
+        "_order" : "desc"
+      }
+
+    const responseApi = await fetch(`${baseUrl}episodes?`
+    + `_limit=${params["_limit"]}&`
+    + `_sort=${params["_sort"]}&` 
+    + `_order=${params["_order"]}`)
+
+    const data = await responseApi.json()
+
+    const paths = data.map((ep) => {
+        return {
+            params: {
+                slug: ep.id
+            }
+        }
+    }) 
+    
+    
     return {
-        paths: [],
+        paths,
         fallback: 'blocking'
     }
 }
@@ -72,9 +96,8 @@ export const getStaticPaths : GetStaticPaths = async function(){
 export const getStaticProps : GetStaticProps = async function(reqParam) {
     
     const episodeURL = reqParam.params
-    console.log(episodeURL)
 
-    const responseAPI = await fetch(`${baseUrl}${episodeURL.slug}`)
+    const responseAPI = await fetch(`${baseUrlEpisodes}${episodeURL.slug}`)
     
     if(responseAPI.ok){
         var data = await responseAPI.json()
@@ -82,8 +105,6 @@ export const getStaticProps : GetStaticProps = async function(reqParam) {
     else if(responseAPI.status >= 400){
         console.error("Erro na requisicao")
     }
-
-    console.log(data)
 
     const episode = {
           id: data.id,
