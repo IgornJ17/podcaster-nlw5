@@ -1,5 +1,5 @@
 //import  from '';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import PlayerContext from '../../context/PlayerContext';
 import Episode from '../../pages/episodes/[slug]';
 import styles from './styles.module.scss'
@@ -24,8 +24,29 @@ function disableButton(aEpisodes){
 
 function Player(){
 
-    const { listOfEpisode, currentEpisodeIndex } = useContext(PlayerContext);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const { 
+        listOfEpisode, 
+        currentEpisodeIndex, 
+        isPlaying, 
+        switchPlay,
+        changeStatePlaying 
+    } = useContext(PlayerContext);
     var episodes = listOfEpisode[currentEpisodeIndex]
+
+
+    useEffect(() => {
+       if(audioRef.current == null){
+           return;
+       }
+       console.log(audioRef.current)
+       if(isPlaying){
+           audioRef.current.play();
+       }else{
+           audioRef.current.pause();
+       }
+        
+    }, [isPlaying]);
 
 
     return (
@@ -92,6 +113,17 @@ function Player(){
 
                 </div>
 
+                { (episodes != null || episodes != undefined) ?  (
+                        <audio 
+                            src={episodes.url}
+                            ref={audioRef}
+                            autoPlay
+                            onPlay={() => changeStatePlaying(true)}
+                            onPause={() => changeStatePlaying(false)}
+                        />
+                    ) : null
+                }
+
                 <div className={styles.Buttons}>
 
                     <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>
@@ -106,10 +138,22 @@ function Player(){
 
                     </button>
 
-                    <button type="button" className={styles.PlayButton} disabled={ disableButton(episodes) }>
-
-                        <img src="/play.svg" alt="Play" className={styles.ImageButtonPlay}/>
-
+                    <button type="button" className={styles.PlayButton} 
+                        disabled={ disableButton(episodes) } 
+                        onClick={ switchPlay }>
+                        {isPlaying ? 
+                            (<img 
+                                src="/pause.svg" 
+                                alt="Pause" 
+                                className={styles.ImageButtonPlay}
+                            />) 
+                            : 
+                            (<img 
+                                src="/play.svg" 
+                                alt="Play" 
+                                className={styles.ImageButtonPlay}
+                            />)
+                        }
                     </button>
 
                     <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>

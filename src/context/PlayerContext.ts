@@ -12,8 +12,13 @@ type EpisodeStruct = {
 type PlayerStruct = {
     listOfEpisode: Array<EpisodeStruct>;
     currentEpisodeIndex: number;
+    isPlaying: boolean;
     startPlay: (sEpisode) => void;
+    changeStatePlaying: (bState: boolean) => void;
+    switchPlay: () => void;
 }
+
+
 
 const PlayerContext = Context({} as PlayerStruct);
 
