@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import styles from './episode.module.scss'
 import Image from 'next/image'
 import Link from 'next/link';
+import { usePlayer } from '../../context/PlayerContext';
+
 
 const HelperMethods = require('../../helpers/FormatHelpers.ts')
 const baseUrlEpisodes = "http://localhost:3333/episodes/"
@@ -27,6 +29,8 @@ type EpisodeProps = {
 
 export default function Episode( {episode} : EpisodeProps ){
 
+    const { startPlay } = usePlayer();
+
     return (
        <div className={styles.Episode}>
            <div className={styles.EpisodeThumbnail}>
@@ -42,7 +46,7 @@ export default function Episode( {episode} : EpisodeProps ){
                     objectFit="cover"
                     src={episode.thumbnail}
                />
-               <button type="button">
+               <button type="button" onClick={() => startPlay(episode)}>
                    <img src="/play.svg" alt="Play PodCast"/>
                </button>
            </div>

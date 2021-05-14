@@ -1,4 +1,4 @@
-import { createContext as Context } from 'react'
+import { createContext as Context, useContext } from 'react'
 
 
 type EpisodeStruct = {
@@ -13,13 +13,24 @@ type PlayerStruct = {
     listOfEpisode: Array<EpisodeStruct>;
     currentEpisodeIndex: number;
     isPlaying: boolean;
+    isLooping: boolean;
+    isShuffling: boolean;
     startPlay: (sEpisode) => void;
+    playEpisodeById: (episodes, index) => void;
+    playPreviousPodcast: () => void;
+    playNextPodcast: () => void;
+    hasPrevious: (index) => boolean; 
+    hasNext: (index) => boolean;
     changeStatePlaying: (bState: boolean) => void;
     switchPlay: () => void;
+    setLoopPodcast: () => void;
+    setShufflePodcast: () => void;
 }
 
 
 
-const PlayerContext = Context({} as PlayerStruct);
+export const PlayerContext = Context({} as PlayerStruct);
 
-export default PlayerContext;
+export const usePlayer = function() {
+       return useContext(PlayerContext);
+}

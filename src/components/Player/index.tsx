@@ -1,10 +1,12 @@
 //import  from '';
-import { useContext, useEffect, useRef } from 'react';
-import PlayerContext from '../../context/PlayerContext';
+import { useEffect, useRef, useState } from 'react';
+import { usePlayer } from '../../context/PlayerContext';
 import Episode from '../../pages/episodes/[slug]';
 import styles from './styles.module.scss'
 import Image from 'next/image'
 import Slider from 'rc-slider'
+
+const Helpers = require('../../helpers/FormatHelpers')
 
 
 import 'rc-slider/assets/index.css'
@@ -28,18 +30,28 @@ function Player(){
     const { 
         listOfEpisode, 
         currentEpisodeIndex, 
-        isPlaying, 
+        isPlaying,
+        playPreviousPodcast,
+        playNextPodcast,
+        hasNext,
+        hasPrevious,
+        isLooping,
+        isShuffling,
+        setShufflePodcast,
         switchPlay,
+        setLoopPodcast,
         changeStatePlaying 
-    } = useContext(PlayerContext);
-    var episodes = listOfEpisode[currentEpisodeIndex]
+    } = usePlayer();
+
+    const [ audioProgress, setAudioProgress ] = useState(0);
+
+    const episodes = listOfEpisode[currentEpisodeIndex]
 
 
     useEffect(() => {
        if(audioRef.current == null){
            return;
        }
-       console.log(audioRef.current)
        if(isPlaying){
            audioRef.current.play();
        }else{
@@ -47,6 +59,24 @@ function Player(){
        }
         
     }, [isPlaying]);
+
+
+    function setAudioListener(){
+        audioRef.current.currentTime = 0
+
+        audioRef.current.addEventListener('timeupdate', () => {
+            setAudioProgress(Math.floor(audioRef.current.currentTime))
+        })
+    }
+
+    function handleAudio(amount: number){
+        audioRef.current.currentTime = amount;
+        setAudioProgress(amount)
+    }
+
+    function changeEpisode(){
+        
+    }
 
 
     return (
@@ -92,12 +122,15 @@ function Player(){
 
                 <div className={styles.Progress}>
 
-                    <span className={styles.SpanDuraction}>00:00</span>
+                    <span className={styles.SpanDuraction}>{Helpers.formatDuration(audioProgress)}</span>
 
                         <div className={styles.Slider}>
                             
                             { validListEpisodeContent(episodes) ? (
-                                    <Slider 
+                                    <Slider
+                                        max={Number(episodes.duration)}
+                                        value={audioProgress}
+                                        onChange={handleAudio}
                                         trackStyle={{ backgroundColor: '#0c8029' }}
                                         railStyle={{ backgroundColor: 'white' }}/>
                                 ) : 
@@ -109,7 +142,7 @@ function Player(){
                             
                         </div>
 
-                    <span className={styles.SpanDuraction}>00:00</span>
+                    <span className={styles.SpanDuraction}>{ Helpers.formatDuration(episodes?.duration ?? 0)}</span>
 
                 </div>
 
@@ -118,6 +151,9 @@ function Player(){
                             src={episodes.url}
                             ref={audioRef}
                             autoPlay
+                            loop={isLooping}
+                            onLoadedMetadata={setAudioListener}
+                            onEnded={changeEpisode}
                             onPlay={() => changeStatePlaying(true)}
                             onPause={() => changeStatePlaying(false)}
                         />
@@ -126,13 +162,17 @@ function Player(){
 
                 <div className={styles.Buttons}>
 
-                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>
+                    <button type="button"
+                        className={styles.PlayerButton} 
+                        disabled={ disableButton(episodes) || listOfEpisode.length == 1}
+                        onClick={setShufflePodcast}
+                    >
 
-                        <img src="/shuffle.svg" alt="Random" className={styles.ImageButton} />
+                        <img src="/shuffle.svg" alt="Random" className={isShuffling ? styles.ImageButtonActive : ''} />
 
                     </button>
 
-                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>
+                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) || hasPrevious(currentEpisodeIndex) } onClick={playPreviousPodcast}>
 
                         <img src="/play-previous.svg" alt="Play Previous" className={styles.ImageButton}/>
 
@@ -156,15 +196,19 @@ function Player(){
                         }
                     </button>
 
-                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>
+                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) || hasNext(currentEpisodeIndex) } onClick={playNextPodcast}>
 
                         <img src="/play-next.svg" alt="Play Next" className={styles.ImageButton}/>
 
                     </button>
 
-                    <button type="button" className={styles.PlayerButton} disabled={ disableButton(episodes) }>
+                    <button type="button" 
+                        className={styles.PlayerButton}
+                        disabled={ disableButton(episodes) }
+                        onClick={setLoopPodcast}
+                    >
 
-                        <img src="/repeat.svg" alt="Repeat" className={styles.ImageButton}/>
+                        <img src="/repeat.svg" alt="Repeat" className={ isLooping ? styles.ImageButtonActive : ''}/>
 
                     </button>
 
